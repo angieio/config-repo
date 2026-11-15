@@ -11,6 +11,7 @@
         <module name="pedido-service" />
         <module name="producto-service" />
         <module name="eureka-server" />
+        <module name="gateway-service" />
       </profile>
     </annotationProcessing>
   </component>
@@ -19,6 +20,7 @@
       <module name="categoria-service" options="-parameters" />
       <module name="cliente-service" options="-parameters" />
       <module name="eureka-server" options="-parameters" />
+      <module name="gateway-service" options="-parameters" />
       <module name="pedido-service" options="-parameters" />
       <module name="producto-service" options="-parameters" />
     </option>
