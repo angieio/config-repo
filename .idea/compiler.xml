@@ -6,15 +6,18 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="cliente-service" />
         <module name="config-server" />
+        <module name="cliente-service" />
         <module name="categoria-service" />
         <module name="producto-service" />
         <module name="gateway-service" />
+        <module name="eureka-server (1)" />
         <module name="pedido-service" />
-        <module name="eureka-server" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="eureka-server" target="24" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
@@ -22,7 +25,8 @@
       <module name="cliente-service" options="-parameters" />
       <module name="config-server" options="-parameters" />
       <module name="eureka-server" options="-parameters" />
-      <module name="gateway-service" options="-parameters" />
+      <module name="eureka-server (1)" options="-parameters" />
+      <module name="gateway-service" options="" />
       <module name="pedido-service" options="-parameters" />
       <module name="producto-service" options="-parameters" />
     </option>
