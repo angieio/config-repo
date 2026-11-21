@@ -1,8 +1,8 @@
 server:
-  port: 8082
+  port: 8081
 spring:
   application:
-    name: categoria-service
+    name: cliente-service
   datasource:
     url: jdbc:mysql://localhost:3306/clientes_dev
     username: root
