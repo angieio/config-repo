@@ -21,11 +21,17 @@ public class PedidoService {
     private final PedidoRepository repo;
     private final ClienteClient clienteClient;
     private final ProductoClient productoClient;
+    private final ProductoCircuitService productoCircuitService;
 
-    public PedidoService(PedidoRepository repo, ClienteClient clienteClient, ProductoClient productoClient) {
+    public PedidoService(
+            PedidoRepository repo,
+            ClienteClient clienteClient,
+            ProductoClient productoClient,
+            ProductoCircuitService productoCircuitService) {
         this.repo = repo;
         this.clienteClient = clienteClient;
         this.productoClient = productoClient;
+        this.productoCircuitService = productoCircuitService;
     }
 
     public PedidoResponse guardar(PedidoRequest datos) {
@@ -62,7 +68,11 @@ public class PedidoService {
     }
 
     private PedidoResponse completar(Pedido pedido) {
-        return respuesta(pedido, consultarCliente(pedido.getClienteId()), consultarProducto(pedido.getProductoId()));
+        ClienteDTO cliente = consultarCliente(pedido.getClienteId());
+        ProductoDTO producto =
+                productoCircuitService.obtenerProducto(pedido.getProductoId());
+
+        return respuesta(pedido, cliente, producto);
     }
 
     private PedidoResponse respuesta(Pedido pedido, ClienteDTO cliente, ProductoDTO producto) {
