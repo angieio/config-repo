@@ -14,10 +14,17 @@ import org.springframework.web.server.ResponseStatusException;
 public class ProductoService {
     private final ProductoRepository repo;
     private final CategoriaClient categoriaClient;
-    public ProductoService(ProductoRepository repo, CategoriaClient categoriaClient) {
+    private final CategoriaCircuitService categoriaCircuitService;
+
+    public ProductoService(
+            ProductoRepository repo,
+            CategoriaClient categoriaClient,
+            CategoriaCircuitService categoriaCircuitService) {
         this.repo = repo;
         this.categoriaClient = categoriaClient;
+        this.categoriaCircuitService = categoriaCircuitService;
     }
+
     public List<Producto> listar() { return repo.findAll().stream().map(this::completar).toList(); }
     private Producto buscar(Long id) {
         return repo.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Producto no encontrado"));
@@ -36,7 +43,10 @@ public class ProductoService {
         return guardado;
     }
     private Producto completar(Producto producto) {
-        producto.setCategoria(consultarCategoria(producto.getCategoriaId()));
+        Long categoriaId = producto.getCategoriaId();
+        if (categoriaId != null) {
+            producto.setCategoria(categoriaCircuitService.obtenerCategoria(categoriaId));
+        }
         return producto;
     }
     private CategoriaDTO consultarCategoria(Long id) {

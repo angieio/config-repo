@@ -1,5 +1,4 @@
-package com.tecsup.categoria_service.Services;
-
+package com.tecsup.producto_service.Services;
 
 import com.tecsup.producto_service.Dto.CategoriaDTO;
 import com.tecsup.producto_service.client.CategoriaClient;
