@@ -3,6 +3,8 @@ package com.tecsup.pedido_service.Services;
 import com.tecsup.pedido_service.Dto.ProductoDTO;
 import com.tecsup.pedido_service.client.ProductoClient;
 import feign.FeignException;
+import io.github.resilience4j.bulkhead.BulkheadFullException;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,10 +17,16 @@ public class ProductoCircuitService {
     @Autowired
     private ProductoClient productoClient;
 
+    @Bulkhead(name = "productoBulkhead", fallbackMethod = "productoOcupado")
     @CircuitBreaker(name = "productoService", fallbackMethod = "productoFallback")
     public ProductoDTO obtenerProducto(Long id) {
         System.out.println("Llamando a producto-service...");
         return productoClient.obtenerProducto(id);
+    }
+
+    public ProductoDTO productoOcupado(Long id, BulkheadFullException ex) {
+        System.out.println("Bulkhead de Producto: " + ex.getMessage());
+        return new ProductoDTO(id, "Producto temporalmente no disponible", null);
     }
 
     public ProductoDTO productoFallback(Long id, Exception ex) {

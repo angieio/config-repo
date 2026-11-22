@@ -34,3 +34,13 @@ resilience4j:
         minimumNumberOfCalls: 3
         failureRateThreshold: 50
         waitDurationInOpenState: 10s
+  bulkhead:
+    instances:
+      categoriaBulkhead:
+        maxConcurrentCalls: 2
+        maxWaitDuration: 1s
+  retry:
+    instances:
+      categoriaRetry:
+        maxAttempts: 3
+        waitDuration: 2s

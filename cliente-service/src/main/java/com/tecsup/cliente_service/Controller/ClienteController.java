@@ -23,7 +23,10 @@ public class ClienteController {
     @GetMapping
     public List<Cliente> listar() { return service.listar(); }
     @GetMapping("/{id}")
-    public Cliente obtener(@PathVariable("id") Long id) { return service.obtener(id); }
+    public Cliente obtener(@PathVariable("id") Long id) throws InterruptedException {
+        Thread.sleep(5_000);
+        return service.obtener(id);
+    }
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Cliente registrar(@Valid @RequestBody ClienteRequest datos) { return service.guardar(datos); }

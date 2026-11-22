@@ -24,7 +24,9 @@ public class CategoriaController {
     @GetMapping
     public List<Categoria> listar() { return service.listar(); }
     @GetMapping("/{id}")
-    public Categoria obtener(@PathVariable("id") Long id) { return service.obtener(id); }
+    public Categoria obtener(@PathVariable("id") Long id) {
+        return service.obtener(id);
+    }
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Categoria registrar(@Valid @RequestBody CategoriaDTO datos) {

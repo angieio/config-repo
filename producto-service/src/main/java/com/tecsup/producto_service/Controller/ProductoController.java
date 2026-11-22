@@ -23,7 +23,10 @@ public class ProductoController {
     @GetMapping
     public List<Producto> listar() { return service.listar(); }
     @GetMapping("/{id}")
-    public Producto obtener(@PathVariable("id") Long id) { return service.obtener(id); }
+    public Producto obtener(@PathVariable("id") Long id) throws InterruptedException {
+        Thread.sleep(10_000);
+        return service.obtener(id);
+    }
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Producto registrar(@Valid @RequestBody ProductoRequest datos) { return service.guardar(datos); }

@@ -6,6 +6,14 @@ spring:
     name: pedido-service
   config:
     import: optional:configserver:http://localhost:8888
+  cloud:
+    openfeign:
+      client:
+        config:
+          cliente-service:
+            readTimeout: 4000
+          producto-service:
+            readTimeout: 15000
   datasource:
     url: ${DB_URL:jdbc:mysql://localhost:3306/pedidos_dev}
     username: ${DB_USERNAME:root}
@@ -36,3 +44,15 @@ resilience4j:
         waitDurationInOpenState: 10s
         ignoreExceptions:
           - 'feign.FeignException$NotFound'
+  retry:
+    instances:
+      clienteRetry:
+        maxAttempts: 3
+        waitDuration: 2s
+        ignoreExceptions:
+          - 'feign.FeignException$NotFound'
+  bulkhead:
+    instances:
+      productoBulkhead:
+        maxConcurrentCalls: 2
+        maxWaitDuration: 1s

@@ -4,7 +4,9 @@ import com.tecsup.pedido_service.client.*;
 import com.tecsup.pedido_service.Dto.*;
 import com.tecsup.pedido_service.Model.*;
 import com.tecsup.pedido_service.Repository.PedidoRepository;
+import com.tecsup.pedido_service.Services.ClienteRetryService;
 import com.tecsup.pedido_service.Services.PedidoService;
+import com.tecsup.pedido_service.Services.ProductoCircuitService;
 import feign.FeignException;
 import jakarta.validation.Validation;
 import org.junit.jupiter.api.Test;
@@ -17,7 +19,10 @@ class PedidoServiceTest {
     private final PedidoRepository repo = mock(PedidoRepository.class);
     private final ClienteClient clientes = mock(ClienteClient.class);
     private final ProductoClient productos = mock(ProductoClient.class);
-    private final PedidoService service = new PedidoService(repo, clientes, productos);
+    private final ClienteRetryService clienteRetry = mock(ClienteRetryService.class);
+    private final ProductoCircuitService productoCircuit = mock(ProductoCircuitService.class);
+    private final PedidoService service =
+            new PedidoService(repo, clientes, productos, productoCircuit, clienteRetry);
 
     @Test
     void consultaCompletaPedidoConAmbasApis() {
@@ -28,16 +33,16 @@ class PedidoServiceTest {
         pedido.setCantidad(2);
         pedido.setEstado(EstadoPedido.PENDIENTE);
         when(repo.findById(7L)).thenReturn(Optional.of(pedido));
-        when(clientes.obtenerCliente(2L)).thenReturn(new ClienteDTO(2L, "Carlos", "Ramirez"));
-        when(productos.obtenerProducto(3L)).thenReturn(new ProductoDTO(3L, "Laptop", 2500.0));
+        when(clienteRetry.obtenerCliente(2L)).thenReturn(new ClienteDTO(2L, "Carlos", "Ramirez"));
+        when(productoCircuit.obtenerProducto(3L)).thenReturn(new ProductoDTO(3L, "Laptop", 2500.0));
 
         PedidoResponse respuesta = service.obtener(7L);
 
         assertEquals("Carlos", respuesta.cliente().nombre());
         assertEquals("Laptop", respuesta.producto().nombre());
         assertEquals(2, respuesta.cantidad());
-        verify(clientes).obtenerCliente(2L);
-        verify(productos).obtenerProducto(3L);
+        verify(clienteRetry).obtenerCliente(2L);
+        verify(productoCircuit).obtenerProducto(3L);
         verify(repo, never()).save(any());
     }
 
@@ -68,16 +73,20 @@ class PedidoServiceTest {
     }
 
     @Test
-    void responde503SiProductoNoEstaDisponible() {
+    void devuelvePedidoConElFallbackDeProducto() {
         Pedido pedido = new Pedido();
+        pedido.setId(7L);
         pedido.setClienteId(2L);
         pedido.setProductoId(3L);
         when(repo.findById(7L)).thenReturn(Optional.of(pedido));
-        FeignException error = mock(FeignException.class);
-        when(error.status()).thenReturn(503);
-        when(productos.obtenerProducto(3L)).thenThrow(error);
-        assertEquals(503, assertThrows(ResponseStatusException.class,
-            () -> service.obtener(7L)).getStatusCode().value());
+        when(clienteRetry.obtenerCliente(2L)).thenReturn(new ClienteDTO(2L, "Carlos", "Ramirez"));
+        when(productoCircuit.obtenerProducto(3L))
+                .thenReturn(new ProductoDTO(3L, "Producto temporalmente no disponible", null));
+
+        PedidoResponse respuesta = service.obtener(7L);
+
+        assertEquals(7L, respuesta.id());
+        assertEquals("Producto temporalmente no disponible", respuesta.producto().nombre());
     }
 
     @Test
